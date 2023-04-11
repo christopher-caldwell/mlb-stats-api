@@ -3,29 +3,71 @@ import axios, { AxiosInstance } from 'axios'
 
 import type {
   GetAttendanceArgs,
-  AttendanceResponse,
-  GetAwardsResponse,
-  GetAwardRecipientResponse,
   GetAwardRecipientsArgs,
   GetConferenceArgs,
-  ConferenceResponse,
   GetDivisionsArgs,
-  DivisionsResponse,
   GetDraftArgs,
-  DraftResponse,
-  DraftProspectsResponse,
-  LatestDraftPickResponse,
   GetGameArgs,
-  GameResponse,
+  GetGameContentArgs,
 } from './schemas'
+import type {
+  AttendanceResponse,
+  AwardsResponse,
+  AwardsRecipientResponse,
+  DraftResponse,
+  GameResponse,
+  LatestDraftPickResponse,
+  ConferenceResponse,
+  DraftProspectsResponse,
+  DivisionsResponse,
+  GameContentResponse,
+} from './types'
 import { formatErrorMessage } from './utils'
+import {
+  getAttendance,
+  getAwards,
+  getAwardRecipients,
+  getConferences,
+  getDivisions,
+  getDraft,
+  getDraftProspects,
+  getDraftLatestDraftPick,
+  getGame,
+  getGameBoxscore,
+  getGameContent,
+} from './endpoints'
 
 export class MlbStatsApi {
   apiUrl = 'https://statsapi.mlb.com/api/'
   version = 'v1'
   client: AxiosInstance
 
+  // endpoints
+  getAttendance: (options: GetAttendanceArgs) => Promise<AttendanceResponse>
+  getAwards: (awardId?: string) => Promise<AwardsResponse>
+  getAwardRecipients: (options: GetAwardRecipientsArgs) => Promise<AwardsRecipientResponse>
+  getConferences: (options: GetConferenceArgs) => Promise<ConferenceResponse>
+  getDivisions: (options: GetDivisionsArgs) => Promise<DivisionsResponse>
+  getDraft: (options: GetDraftArgs) => Promise<DraftResponse>
+  getDraftProspects: (options: GetDraftArgs) => Promise<DraftProspectsResponse>
+  getDraftLatestDraftPick: (options: GetDraftArgs) => Promise<LatestDraftPickResponse>
+  getGame: (options: GetGameArgs) => Promise<GameResponse>
+  getGameBoxscore: (options: GetGameArgs) => Promise<{}>
+  getGameContent: (options: GetGameContentArgs) => Promise<GameContentResponse>
+
   constructor(public shouldSkipValidation = false, client?: AxiosInstance) {
+    this.getAttendance = getAttendance.bind(this)
+    this.getAwards = getAwards.bind(this)
+    this.getAwardRecipients = getAwardRecipients.bind(this)
+    this.getConferences = getConferences.bind(this)
+    this.getDivisions = getDivisions.bind(this)
+    this.getDraft = getDraft.bind(this)
+    this.getDraftProspects = getDraftProspects.bind(this)
+    this.getDraftLatestDraftPick = getDraftLatestDraftPick.bind(this)
+    this.getGame = getGame.bind(this)
+    this.getGameBoxscore = getGameBoxscore.bind(this)
+    this.getGameContent = getGameContent.bind(this)
+
     if (client) this.client = client
     else {
       this.client = axios.create({
@@ -47,105 +89,5 @@ export class MlbStatsApi {
       const errorMessage = formatErrorMessage(result.error, schema)
       throw new Error(errorMessage)
     }
-  }
-
-  async getAttendance(options: GetAttendanceArgs) {
-    const { data } = await this.client.get<AttendanceResponse>('/attendance', { params: options })
-    if (!this.shouldSkipValidation) {
-      const { attendanceSchema } = await import('./schemas/attendance')
-      this.validateSchema(attendanceSchema, data)
-    }
-    return data
-  }
-
-  async getAwards(awardId = '') {
-    const { data } = await this.client.get<GetAwardsResponse>('/awards/' + awardId)
-    if (!this.shouldSkipValidation) {
-      const { getAwardsSchema } = await import('./schemas/awards')
-      this.validateSchema(getAwardsSchema, data)
-    }
-    return data
-  }
-
-  async getAwardRecipients({ awardId, ...options }: GetAwardRecipientsArgs) {
-    const { data } = await this.client.get<GetAwardRecipientResponse>(`/awards/${awardId}/recipients`, {
-      params: options,
-    })
-    if (!this.shouldSkipValidation) {
-      const { awardRecipientSchema } = await import('./schemas/awards')
-      this.validateSchema(awardRecipientSchema, data)
-    }
-    return data
-  }
-
-  async getConferences(options?: GetConferenceArgs) {
-    const { data } = await this.client.get<ConferenceResponse>('/conferences', { params: options })
-    if (!this.shouldSkipValidation) {
-      const { conferencesSchema } = await import('./schemas/conferences')
-      this.validateSchema(conferencesSchema, data)
-    }
-    return data
-  }
-
-  async getDivisions(options?: GetDivisionsArgs) {
-    const { data } = await this.client.get<DivisionsResponse>('/divisions', { params: options })
-    if (!this.shouldSkipValidation) {
-      const { divisionsSchema } = await import('./schemas/divisions')
-      this.validateSchema(divisionsSchema, data)
-    }
-    return data
-  }
-
-  /** When draft year is not provided, returns the most current draft. For example, when this is called on April 3rd 2023,
-   * it will return the 2023 draft, which hasn't happened yet.
-   */
-  async getDraft({ draftYear, ...options }: GetDraftArgs = {}) {
-    const draftYearToSend = draftYear ? draftYear : ''
-    const { data } = await this.client.get<DraftResponse>(`/draft/${draftYearToSend}`, { params: options })
-    if (!this.shouldSkipValidation) {
-      const { draftSchema } = await import('./schemas/draft')
-      this.validateSchema(draftSchema, data)
-    }
-    return data
-  }
-
-  async getDraftProspects({ draftYear, ...options }: GetDraftArgs = {}) {
-    const draftYearToSend = draftYear ? draftYear : ''
-    const { data } = await this.client.get<DraftProspectsResponse>(`/draft/prospects/${draftYearToSend}`, {
-      params: options,
-    })
-    if (!this.shouldSkipValidation) {
-      const { draftProspectsSchema } = await import('./schemas/draft')
-      this.validateSchema(draftProspectsSchema, data)
-    }
-    return data
-  }
-
-  /** Returns the most recent draft pick. If used outside the live draft, will return the very last round's, very last pick */
-  async getDraftLatestDraftPick({ draftYear, ...options }: GetDraftArgs = {}) {
-    const draftYearToSend = draftYear ? draftYear : ''
-    // TODO: figure out most recent draft year
-    const { data } = await this.client.get<LatestDraftPickResponse>(`/draft/prospects/${draftYearToSend}`, {
-      params: options,
-    })
-    if (!this.shouldSkipValidation) {
-      const { latestDraftPickSchema } = await import('./schemas/draft')
-      this.validateSchema(latestDraftPickSchema, data)
-    }
-    return data
-  }
-
-  getGame = async ({ gamePk, ...options }: GetGameArgs) => {
-    const { data } = await this.client.request<GameResponse>({
-      baseURL: this.getUrl(true),
-      url: `/game/${gamePk}/feed/live`,
-      params: options,
-    })
-    if (!this.shouldSkipValidation) {
-      const { gameSchema } = await import('./schemas/game')
-      this.validateSchema(gameSchema, data)
-    }
-
-    return data
   }
 }

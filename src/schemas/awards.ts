@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { TypeGenConfig } from '../types'
+
 export const getAwardsSchema = z
   .object({
     copyright: z.string(),
@@ -45,6 +47,17 @@ export const awardRecipientSchema = z
 
 export type GetAwardsResponse = z.infer<typeof getAwardsSchema>
 export type GetAwardRecipientResponse = z.infer<typeof awardRecipientSchema>
+
+export const awardsGen: TypeGenConfig = {
+  typeName: 'AwardsResponse',
+  outputFileName: 'awards.ts',
+  schema: getAwardsSchema,
+}
+export const awardsRecipientGen: TypeGenConfig = {
+  typeName: 'AwardsRecipientResponse',
+  outputFileName: 'awardsRecipient.ts',
+  schema: awardRecipientSchema,
+}
 
 export interface GetAwardRecipientsArgs {
   sportId?: number

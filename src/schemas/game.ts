@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { personSchema } from './shared'
+import type { TypeGenConfig } from '../types'
 
 const playerSchema = z.object({
   person: z.object({ id: z.number(), fullName: z.string(), link: z.string() }),
@@ -668,8 +669,12 @@ export const gameSchema = z
   })
   .describe('Game')
 
-export type GameResponse = z.infer<typeof gameSchema>
-
+export type GameSchemaResponse = z.infer<typeof gameSchema>
+export const gameGen: TypeGenConfig = {
+  typeName: 'GameResponse',
+  outputFileName: 'game.ts',
+  schema: gameSchema,
+}
 export interface GetGameArgs {
   timecode?: string
   hydrate?: string

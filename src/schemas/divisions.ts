@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import type { TypeGenConfig } from '../types'
+
 export const divisionsSchema = z
   .object({
     copyright: z.string(),
@@ -22,7 +24,13 @@ export const divisionsSchema = z
   })
   .describe('Divisions Schema')
 
-export type DivisionsResponse = z.infer<typeof divisionsSchema>
+export type DivisionsSchemaResponse = z.infer<typeof divisionsSchema>
+
+export const divisionsGen: TypeGenConfig = {
+  typeName: 'DivisionsResponse',
+  outputFileName: 'divisions.ts',
+  schema: divisionsSchema,
+}
 
 export interface GetDivisionsArgs {
   divisionId?: number

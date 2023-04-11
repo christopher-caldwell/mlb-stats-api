@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import type { TypeGenConfig } from '../types'
+
 export const conferencesSchema = z
   .object({
     copyright: z.string(),
@@ -18,7 +20,13 @@ export const conferencesSchema = z
   })
   .describe('Conferences Schema')
 
-export type ConferenceResponse = z.infer<typeof conferencesSchema>
+export type ConferenceSchemaResponse = z.infer<typeof conferencesSchema>
+
+export const conferencesGen: TypeGenConfig = {
+  typeName: 'ConferenceResponse',
+  outputFileName: 'conferences.ts',
+  schema: conferencesSchema,
+}
 
 export interface GetConferenceArgs {
   conferenceId?: number

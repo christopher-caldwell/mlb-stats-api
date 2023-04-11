@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { personSchema, schoolSchema, homeSchema, teamSchema, fullTeamSchema } from './shared'
+import { TypeGenConfig } from '../types'
 
 export const draftSchema = z
   .object({
@@ -93,9 +94,25 @@ export const latestDraftPickSchema = z
   })
   .describe('Latest Draft Pick')
 
-export type DraftResponse = z.infer<typeof draftSchema>
-export type DraftProspectsResponse = z.infer<typeof draftProspectsSchema>
-export type LatestDraftPickResponse = z.infer<typeof latestDraftPickSchema>
+export type DraftSchemaResponse = z.infer<typeof draftSchema>
+export type DraftProspectsSchemaResponse = z.infer<typeof draftProspectsSchema>
+export type LatestDraftPickSchemaResponse = z.infer<typeof latestDraftPickSchema>
+
+export const draftGen: TypeGenConfig = {
+  typeName: 'DraftResponse',
+  outputFileName: 'draft.ts',
+  schema: draftSchema,
+}
+export const draftProspectsGen: TypeGenConfig = {
+  typeName: 'DraftProspectsResponse',
+  outputFileName: 'draftProspect.ts',
+  schema: draftProspectsSchema,
+}
+export const latestDraftPickGen: TypeGenConfig = {
+  typeName: 'LatestDraftPickResponse',
+  outputFileName: 'latestDraftPick.ts',
+  schema: latestDraftPickSchema,
+}
 
 export interface GetDraftArgs {
   limit?: number

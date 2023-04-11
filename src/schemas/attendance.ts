@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { RequireAtLeastOne } from '../utils'
+import type { TypeGenConfig } from '../types'
 
 export const attendanceSchema = z.object({
   copyright: z.string(),
@@ -61,7 +62,13 @@ export const attendanceSchema = z.object({
   }),
 })
 
-export type AttendanceResponse = z.infer<typeof attendanceSchema>
+export type AttendanceSchemaResponse = z.infer<typeof attendanceSchema>
+
+export const attendanceGen: TypeGenConfig = {
+  typeName: 'AttendanceResponse',
+  outputFileName: 'attendance.ts',
+  schema: attendanceSchema,
+}
 
 export type GetAttendanceArgs = RequireAtLeastOne<
   {

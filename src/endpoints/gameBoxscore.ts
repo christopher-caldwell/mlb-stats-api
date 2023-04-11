@@ -7,7 +7,7 @@ export const getGameBoxscore: MlbStatsApi['getGameBoxscore'] = async function (
 ) {
   const { data } = await this.client.request<GameResponse>({
     baseURL: this.getUrl(true),
-    url: `/game/${gamePk}/feed/live`,
+    url: `/game/${gamePk}/boxscore`,
     params: options,
   })
   if (!this.shouldSkipValidation) {
